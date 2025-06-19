@@ -1,0 +1,26 @@
+{
+  "article": [],
+  "blog": [],
+  "brand": [],
+  "collection": [],
+  "company": [],
+  "company_location": [],
+  "location": [],
+  "market": [],
+  "order": [],
+  "page": [],
+  "product": [
+    {
+      "key": "rich_text",
+      "namespace": "custom",
+      "name": "Rich text",
+      "description": "",
+      "type": {
+        "name": "rich_text_field",
+        "category": "TEXT"
+      }
+    }
+  ],
+  "variant": [],
+  "shop": []
+}

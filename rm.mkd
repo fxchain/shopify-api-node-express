@@ -1,0 +1,7 @@
+# Shopify Node middleware
+
+This backend Node application is used as a middleware to enables a frontend app to interact with Shopify's admin API.
+
+It uses JWT token and CORS for security.
+
+
