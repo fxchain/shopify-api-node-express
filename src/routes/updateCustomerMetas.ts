@@ -1,9 +1,13 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import shopifyClient from '../services/shopifyService.js';
 import auth from '../middleware/auth.js';
 const router = express.Router();
 
-router.post("/update_metas", auth, async (req, res) => {
+interface RequestWithCustomerId extends Request {
+    customerId?: number
+}
+
+router.post("/update_metas", auth, async (req: RequestWithCustomerId, res: Response) => {
     const customerId = req.customerId;
 
     // Check if metaobject is set for the customer

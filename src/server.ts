@@ -7,10 +7,9 @@ const app = express();
 
 app.use("/", getToken);
 
-
 app.use("/", updateCustomerMetas);
 
-app.get('/', auth, (req, res) => {
+app.get('/', (req, res) => {
   console.log('req', req);
   
   res.send('Hello World!');

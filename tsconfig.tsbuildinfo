@@ -1,0 +1,1 @@
+{"root":["./src/server.ts","./src/middleware/auth.ts","./src/routes/getToken.ts","./src/routes/updateCustomerMetas.ts","./src/services/shopifyService.ts"],"errors":true,"version":"5.8.3"}

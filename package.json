@@ -2,11 +2,13 @@
   "name": "express-shopi",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/server.js",
   "type": "module",
   "scripts": {
-    "start": "node server",
-    "dev": "node --watch --env-file .env server"
+    "dev:old": "node --watch --env-file .env server",
+    "dev": "npx tsx ./src/server.ts",
+    "build": "tsc --build",
+    "start": "node ./dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +18,12 @@
     "cookie-parser": "^1.4.7",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }
