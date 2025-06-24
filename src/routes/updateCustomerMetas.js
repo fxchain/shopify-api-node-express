@@ -2,6 +2,8 @@ import express from 'express';
 import shopifyClient from '../services/shopifyService.js';
 import auth from '../middleware/auth.js';
 const router = express.Router();
+const metafieldNamespace = process.env.SHOPIFY_METAFIELD_NAMESPACE || "custom";
+const metafieldKey = process.env.SHOPIFY_METAFIELD_KEY || "chaussures";
 
 router.post("/update_metas", auth, async (req, res) => {
     const customerId = req.customerId;
@@ -12,7 +14,7 @@ router.post("/update_metas", auth, async (req, res) => {
             query CustomerMetafieldQuery($id: ID!){
                 customer(id: $id) {
                     id
-                    metafield(namespace: "custom", key: "chaussures") {
+                    metafield(namespace: ${metafieldNamespace}, key: ${metafieldKey}) {
                         value
                     }
                 }
@@ -37,7 +39,7 @@ router.post("/update_metas", auth, async (req, res) => {
         try {
             const getMetaobjectId = `
                 {
-                    metaobjects(first: 5, type: "chaussures") {
+                    metaobjects(first: 5, type: ${metafieldKey}) {
                         nodes {
                             id
                         }
@@ -74,8 +76,8 @@ router.post("/update_metas", auth, async (req, res) => {
                 variables: {
                     metafields: [
                         {
-                            key: "chaussures",
-                            namespace: "custom",
+                            key: metafieldKey,
+                            namespace: metafieldNamespace,
                             ownerId: `gid://shopify/Customer/${customerId}`,
                             type: "metaobject_reference",
                             value: metaObjectId
@@ -105,7 +107,7 @@ router.post("/update_metas", auth, async (req, res) => {
                 metaobjectUpdate(id: $id, metaobject: $metaobject) {
                     metaobject {
                         handle
-                        chaussures: field(key: "chaussures") {
+                        chaussures: field(key: ${metafieldKey}) {
                             value
                         }
                     }
@@ -118,7 +120,7 @@ router.post("/update_metas", auth, async (req, res) => {
             }
         `;
 
-        const { data, errors, extensions } = await shopifyClient.request(updateCustomerMetaObject, {
+        const { data, errors } = await shopifyClient.request(updateCustomerMetaObject, {
             variables: {
                 "id": "gid://shopify/Metaobject/158929289530",
                 "metaobject": {

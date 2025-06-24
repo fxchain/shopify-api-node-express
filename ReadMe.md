@@ -1,6 +1,6 @@
 # Shopify Node middleware
 
-This backend Node application is used as a middleware to enables a frontend apps to interact with Shopify's admin API.
+This backend Node application is used as a middleware to enable frontend apps to interact with Shopify's admin API.
 
 It uses JWT token and CORS for security.
 
@@ -24,6 +24,8 @@ Public endpoint to retrive a JWT token valid for an hour. You must POST the cust
 - Node version >20.16.0
 - Access the Shopify store and create/edit custom apps
 
+### Local install
+
 ```
 git clone [git URL]
 cd [folder]
@@ -31,9 +33,15 @@ npm install
 cp .env.exemple .env
 ```
 
-Edit the .env file witht the required info. You will need to create a private app in Shopify, assign the correct scopes and get your API key.
+Edit the .env file witht the required info. You will need to create a private app in Shopify, assign the correct scopes and get your app's Admin API access token.
 
-### Run the app
+#### Run the app locally
 `npm run dev`
 
 Use something like Postman to make calls to the local app.
+
+### Server install
+```
+npm install
+npm run start
+```
