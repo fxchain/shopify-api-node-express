@@ -6,6 +6,7 @@ function auth(req, res, next) {
   if (!jwtToken) {
     return res.status(401).json({ message: "Not authorized" });
   }
+  
   jwt.verify(jwtToken, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       return res.status(401).json({ message: "Not authorized" });

@@ -4,7 +4,7 @@ import shopifyClient from '../services/shopifyService.js';
 const router = express.Router();
 router.use(express.json());
 
-router.post("/get_token", async (req, res) => {
+router.post("/", async (req, res) => {
 	const { customerId } = req.body;
 
 	if (!isNaN(customerId)) {
@@ -31,13 +31,19 @@ router.post("/get_token", async (req, res) => {
 			const jwtToken = jwt.sign({ customerId }, process.env.JWT_SECRET, {
 				expiresIn: "1h",
 			});
-			res.cookie("jwtToken", jwtToken, { httpOnly: true, secure: true });
+
+			// res.cookie("jwtToken", jwtToken, {
+			// 	httpOnly: true,
+			// 	secure: true,
+			// 	sameSite: 'strict',
+			// });
+			// sessionStorage.setItem('jwtToken', jwtToken);
 			res.json(jwtToken);
 		} catch (error) {
-			res.status(401).json({ message: "Authentification failed." });
+			res.status(401).json({ message: 'Authentification failed.' });
 		}
 	} else {
-		res.status(401).json({ message: "Authentification failed." });
+		res.status(401).json({ message: 'Authentification failed.' });
 	}
 });
 export default router;

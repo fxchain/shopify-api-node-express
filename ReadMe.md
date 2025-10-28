@@ -21,7 +21,7 @@ Public endpoint to retrive a JWT token valid for an hour. You must POST the cust
 ## Install
 
 ### Requirements
-- Node version >20.16.0
+- Node version >20.18.0
 - Access the Shopify store and create/edit custom apps
 
 ### Local install
