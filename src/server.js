@@ -6,12 +6,12 @@ import updateCustomerMetas from './routes/updateCustomerMetas.js';
 
 const app = express();
 
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
-  methods: process.env.CORS_METHODS || 'GET,POST',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions))
+// const corsOptions = {
+//   origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
+//   methods: process.env.CORS_METHODS || 'GET,POST',
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions))
 
 /*
   * Route : /get_token
