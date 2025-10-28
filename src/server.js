@@ -23,7 +23,7 @@ app.use(cors(corsOptions))
 app.use("/get_token", getToken);
 
 /*
-  * Route : /update_metas
+  * Route : /update_customer_metafields
   * Method: POST
   * Description: Updates customer metadata in the Shopify store.
   * Request Headers: Authorization (JWT token)
@@ -42,9 +42,11 @@ if (process.env.ENVIRONMENT === 'development') {
   app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
   });
-} else {
-  app.listen(443, () => {
-    console.log('Server is running on http://localhost');
-  });
-}
-
+} 
+// else {
+//   app.listen(443, () => {
+//     console.log('Server is running on http://localhost');
+//   });
+//   module.exports = app;
+// }
+export default app;
