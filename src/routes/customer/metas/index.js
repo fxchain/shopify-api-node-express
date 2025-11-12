@@ -5,8 +5,6 @@ const router = express.Router();
 
 //TODO: readd auth
 router.post("/", async (req, res) => {
-    // console.log('req.body', req.body);
-    
     const customerId = req.customerId;
     
     const metafieldNamespace = 'custom';
@@ -27,28 +25,19 @@ router.post("/", async (req, res) => {
         }
         const childHandle = (typeof handle === 'undefined') ? `${first_name}-${customerId}` : handle;
 
-        let fields = [
+        let fieldsProfilEnfant = [
             {"key": "first_name", "value": first_name},
-            // ...((typeof first_name !== 'undefined') && {"key": "first_name", "value": first_name}),
-            // ...((typeof birthday !== 'undefined') && {"key": "birthday", "value": birthday}),
-            // ...((typeof chaussures_associees !== 'undefined') && {"key": "chaussures_associees", "value": chaussures_associees})
         ]
 
         if (typeof birthday !== 'undefined') {
-           fields.push({"key": "birthday", "value": birthday}); 
+           fieldsProfilEnfant.push({"key": "birthday", "value": birthday}); 
         }
 
         if (typeof chaussures_associees !== 'undefined') {
-           fields.push({"key": "chaussures_associees", "value": chaussures_associees}); 
+           fieldsProfilEnfant.push({"key": "chaussures_associees", "value": chaussures_associees}); 
         }
 
-        // fields.push({"key": "first_name", "value": first_name});
-
-        // console.log('fields', fields);
-        
-        
-
-        const variables = {
+        let variables = {
             "handle": {
                 "type": "mm_profil_enfant",
                 "handle": childHandle
@@ -59,14 +48,9 @@ router.post("/", async (req, res) => {
                         "status": 'ACTIVE'
                     }
                 },
-                "fields": fields
+                "fields": fieldsProfilEnfant
             }
         }
-
-        console.log("var", JSON.stringify(variables));
-        
-
-        // return;
 
         try {
             const customerMetafieldQuery = `
@@ -84,8 +68,8 @@ router.post("/", async (req, res) => {
                 }
             `;
 
-            const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, { variables });
-            console.log('errors', errors);
+            const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, { variables: variables });
+            console.log('errors', JSON.stringify(errors));
 
             if (typeof errors !== 'undefined') {
                 handleErrors(errors, res);
@@ -100,134 +84,107 @@ router.post("/", async (req, res) => {
             res.status(401).json({ message: error.message });
         }
 
-        if (typeof req.body.fields.mesures !== 'undefined') {
-            const { pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body.fields.mesures;
+    } else if (updateType === "upsert mesures") {
+        const { handle, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body.fields;
 
-            if (typeof pied_gauche_longueur === 'undefined' && typeof pied_gauche_largeur === 'undefined' && typeof pied_droit_longueur === 'undefined' && typeof pied_droit_largeur === 'undefined') {
-                const mesureError = 'You must provide at least one on this parameters in the measure object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
-                res.status(401).json({ message: mesureError });
+        if (typeof pied_gauche_longueur === 'undefined' && typeof pied_gauche_largeur === 'undefined' && typeof pied_droit_longueur === 'undefined' && typeof pied_droit_largeur === 'undefined') {
+            const mesureError = 'You must provide at least one on this parameters in the measure object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
+            res.status(401).json({ message: mesureError });
+        }
+
+        let date = new Date();
+        const offset = date.getTimezoneOffset();
+        date = new Date(date.getTime() - (offset*60*1000));
+        const now = date.toISOString().split('T')[0];
+
+        // const childMesure = (typeof handle === 'undefined') ? `${now}-${first_name}-${customerId}` : handle;
+
+        const fieldsMesure = [
+            {
+                "key": "date_de_la_mesure",
+                "value": `${now}`
             }
+        ];
+        
 
-            let date = new Date();
-            const offset = date.getTimezoneOffset();
-            date = new Date(date.getTime() - (offset*60*1000));
-            const now = date.toISOString().split('T')[0];
+        if (typeof pied_gauche_longueur !== 'undefined') {
+            fieldsMesure.push({
+                "key": "pied_gauche_longueur",
+                "value": `${pied_gauche_longueur}`
+            })
+        }
 
-            const sdf = [
-                // ...((typeof pied_gauche_longueur !== 'undefined') && {b: 5}),
-                {
-                    "key": "date_de_la_mesure",
-                    "value": `${now}`
-                }
-            ];
+        if (typeof pied_gauche_largeur !== 'undefined') {
+            fieldsMesure.push({
+                "key": "pied_gauche_largeur",
+                "value": `${pied_gauche_largeur}`
+            })
+        }
 
-            let variables = {
-                "handle": {
-                    "type": "mm_mesures",
-                    "handle": `${now}-${first_name}-${customerId}`
+        if (typeof pied_droit_longueur !== 'undefined') {
+            fieldsMesure.push({
+                "key": "pied_droit_longueur",
+                "value": `${pied_droit_longueur}`
+            })
+        }
+
+        if (typeof pied_droit_largeur !== 'undefined') {
+            fieldsMesure.push({
+                "key": "pied_droit_largeur",
+                "value": `${pied_droit_largeur}`
+            })
+        }
+
+        let variables = {
+            "handle": {
+                "type": "mm_mesures",
+                "handle": handle
+            },
+            "metaobject": {
+                "capabilities" : {
+                    "publishable": {
+                        "status": 'ACTIVE'
+                    }
                 },
-                "metaobject": {
-                    "capabilities" : {
-                        "publishable": {
-                            "status": 'ACTIVE'
+                "fields": fieldsMesure
+            }
+        };
+
+
+        console.log("variables", variables);
+        // return;
+        try {
+            const customerMetafieldQuery = `
+                mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
+                    metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
+                        metaobject {
+                            handle
                         }
-                    },
-                    "fields": sdf
-                }
-            };
-
-            // const fields = 
-            //     {
-            //         "key": "date_de_la_mesure",
-            //         "value": `${now}`
-            //     };
-
-            // variables.metaobject.fields.push({"test": "sfqsdf"}, {"test2": "sfqsdf"});
-
-            // console.log('fields', variables.metaobject.fields);
-            
-
-            // const test = {
-            //     "test": "dfgsdfg",
-            //     "test2": "tuiui"
-            // };
-
-            // fields.push({
-            //     "test": "dfgsdfg",
-            //     "test2": "tuiui"
-            // });
-
-            console.log(variables);
-
-
-            // const newObj = fields.map((item, i)=>({...item}));
-            
-
-            // if (typeof pied_gauche_longueur !== 'undefined') {
-            //     fields.push({
-            //         "key": "pied_gauche_longueur",
-            //         "value": `${pied_gauche_longueur}`
-            //     })
-            // }
-
-            // if (typeof pied_gauche_largeur !== 'undefined') {
-            //     fields.push(JSON.stringify({
-            //         "key": "pied_gauche_largeur",
-            //         "value": `${pied_gauche_largeur}`
-            //     }))
-            // }
-
-            // if (typeof pied_droit_longueur !== 'undefined') {
-            //     fields.push(JSON.stringify({
-            //         "key": "pied_droit_longueur",
-            //         "value": `${pied_droit_longueur}`
-            //     }))
-            // }
-
-            // if (typeof pied_droit_largeur !== 'undefined') {
-            //     fields.push(JSON.stringify({
-            //         "key": "pied_droit_largeur",
-            //         "value": `${pied_droit_largeur}`
-            //     }))
-            // }
-
-            
-
-
-            // console.log("variables", variables);
-            // return;
-            try {
-                const customerMetafieldQuery = `
-                    mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
-                        metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
-                            metaobject {
-                                handle
-                            }
-                            userErrors {
-                                field
-                                message
-                                code
-                            }
+                        userErrors {
+                            field
+                            message
+                            code
                         }
                     }
-                `;
-
-                // "handle": `${first_name}-${customerId}`
-                const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, {variables});
-
-            
-                if (typeof errors !== 'undefined') {
-                    handleErrors(errors, res);
                 }
+            `;
 
-                console.log('data', data);
-                
-                
-                var metaObjectData = data;
-            } catch (error) {
-                res.status(401).json({ message: error.message });
+            // "handle": `${first_name}-${customerId}`
+            const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, { variables: variables });
+
+        
+            if (typeof errors !== 'undefined') {
+                handleErrors(errors, res);
             }
+
+            console.log('data', data);
+            
+            
+            var metaObjectData = data;
+        } catch (error) {
+            res.status(401).json({ message: error.message });
         }
+    
     } 
     // else if (updateType === "upsert mesure") {
         
