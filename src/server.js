@@ -1,10 +1,12 @@
 import express from 'express';
-import getToken from './routes/getToken.js';
 import auth from './middleware/auth.js';
 import cors from 'cors';
-import updateCustomerMetas from './routes/updateCustomerMetas.js';
+import getToken from './routes/getToken/index.js';
+import updateCustomerMetas from './routes/customer/metas/index.js';
 
 const app = express();
+
+app.use(express.json());
 
 // const corsOptions = {
 //   origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
@@ -17,22 +19,23 @@ const app = express();
   * Route : /get_token
   * Method: POST
   * Description: Generates a JWT token for the customer based on their ID.
-  * Request Body: { customerId: <customer_id> }
-  * Response: JWT token if successful, error message if not.
+  * If cookie is set to true, the token is set on the user's browser in a cookie
+  * Request Body: { customerId: <customer_id>, cookie: <true | false> }
+  * Response: JWT token if successful, error 4xx if not.
 */
 app.use("/get_token", getToken);
 
 /*
   * Route : /update_customer_metafields
   * Method: POST
-  * Description: Updates customer metadata in the Shopify store.
+  * Description: Updates customer metadata.
   * Request Headers: Authorization (JWT token)
-  * Request Body: { customerId: <customer_id>, metas: <metas_object> }
-  * Response: Success message with posted values if successful, error message if not.
+  * Request Body: { metas: <metas_object> }
+  * Response: Success message with posted values if successful, 4xx error if not.
 */
-app.use("/update_customer_metafields", updateCustomerMetas);
+app.use("/update_customer_metas", updateCustomerMetas);
 
-app.post('/', auth, (req, res) => {
+app.get('/', (req, res) => {
   console.log('req', req);
 
   res.send('Hello World!');
@@ -42,7 +45,7 @@ if (process.env.ENVIRONMENT === 'development') {
   app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
   });
-} 
+}
 // else {
 //   app.listen(443, () => {
 //     console.log('Server is running on http://localhost');

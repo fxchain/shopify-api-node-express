@@ -1,11 +1,15 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import shopifyClient from '../services/shopifyService.js';
+import shopifyClient from '../../services/shopifyService.js';
 const router = express.Router();
 router.use(express.json());
 
 router.post("/", async (req, res) => {
-	const { customerId } = req.body;
+	let { customerId, cookie } = req.body;
+
+	if (!cookie) {
+		cookie = false;
+	}
 
 	if (!isNaN(customerId)) {
 		//Check if customer id exists on store
@@ -29,15 +33,16 @@ router.post("/", async (req, res) => {
 			}
 
 			const jwtToken = jwt.sign({ customerId }, process.env.JWT_SECRET, {
-				expiresIn: "1h",
+				expiresIn: '1h',
 			});
 
-			// res.cookie("jwtToken", jwtToken, {
-			// 	httpOnly: true,
-			// 	secure: true,
-			// 	sameSite: 'strict',
-			// });
-			// sessionStorage.setItem('jwtToken', jwtToken);
+			if (cookie && cookie === true) {
+				res.cookie('middleware_token', jwtToken, {
+					httpOnly: true,
+					secure: process.env.ENVIRONMENT === 'production', // Only send over HTTPS
+					sameSite: 'Strict' // Protect against CSRF
+				});
+			}
 			res.json(jwtToken);
 		} catch (error) {
 			res.status(401).json({ message: 'Authentification failed.' });

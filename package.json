@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@netlify/functions": "^5.0.1",
     "@shopify/shopify-api": "^11.13.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

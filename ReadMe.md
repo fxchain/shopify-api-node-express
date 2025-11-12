@@ -17,6 +17,8 @@ The minium app scopes are `write_metaobjects, read_metaobjects, read_customers`
 `/get_token` POST
 Public endpoint to retrive a JWT token valid for an hour. You must POST the customerID. Use this token to make calls to other prive endpoints
 
+`/update_customer_metafields` POST
+Public endpoint to update customer's metafields or metaobjects.
 
 ## Install
 
@@ -40,8 +42,8 @@ Edit the .env file witht the required info. You will need to create a private ap
 
 Use something like Postman to make calls to the local app.
 
-### Server install
+<!-- ### Server install
 ```
 npm install
 npm run start
-```
+``` -->
