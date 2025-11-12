@@ -1,45 +1,48 @@
-import express from 'express';
+import express, { json } from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
+import metas from './metas.json' with { type: "json" };
 const router = express.Router();
 
 //TODO: readd auth
 router.post("/", async (req, res) => {
-    const customerId = req.customerId;
-    
-    const metafieldNamespace = 'custom';
-    const metafieldKey = 'mm_kids';
+    // const customerId = req.customerId;
+    const customerId = 8643416850746;
+
+    // const metafieldNamespace = 'custom';
+    // const metafieldKey = 'mm_kids';
 
     const updateType = req.body.updateType;
 
     if (!updateType) {
-        res.status(400).json({ error: 'Bad request', message: '"updateType" parameter not provided.' });
+        res.status(400).json({ error: 'Bad request', message: 'Required "updateType" parameter not provided.' });
         return;
     }
-    
-    if (updateType === "upsert child") {
+    let variables;
+
+    if (updateType === 'child') {
         const {handle, first_name, birthday, chaussures_associees} = req.body.fields;
         
         if (typeof first_name === 'undefined') {
             res.status(400).json({ error: 'Bad request', message: 'Required "fields.first_name" parameter not provided.' });
         }
-        const childHandle = (typeof handle === 'undefined') ? `${first_name}-${customerId}` : handle;
+        const childHandle = (typeof handle === 'undefined') ? '' : handle;
 
         let fieldsProfilEnfant = [
-            {"key": "first_name", "value": first_name},
+            {"key": metas.enfant.fields.name, "value": first_name},
         ]
 
         if (typeof birthday !== 'undefined') {
-           fieldsProfilEnfant.push({"key": "birthday", "value": birthday}); 
+           fieldsProfilEnfant.push({"key": metas.enfant.fields.birthday, "value": birthday}); 
         }
 
         if (typeof chaussures_associees !== 'undefined') {
-           fieldsProfilEnfant.push({"key": "chaussures_associees", "value": chaussures_associees}); 
+           fieldsProfilEnfant.push({"key": metas.enfant.fields.chaussures, "value": chaussures_associees}); 
         }
 
-        let variables = {
+        variables = {
             "handle": {
-                "type": "mm_profil_enfant",
+                "type": metas.enfant.name,
                 "handle": childHandle
             },
             "metaobject": {
@@ -57,7 +60,12 @@ router.post("/", async (req, res) => {
                 mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
                     metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
                         metaobject {
+                            id
                             handle
+                            fields {
+                                key
+                                value
+                            }
                         }
                         userErrors {
                             field
@@ -67,9 +75,7 @@ router.post("/", async (req, res) => {
                     }
                 }
             `;
-
             const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, { variables: variables });
-            console.log('errors', JSON.stringify(errors));
 
             if (typeof errors !== 'undefined') {
                 handleErrors(errors, res);
@@ -78,17 +84,18 @@ router.post("/", async (req, res) => {
             // console.log('data', data);
             // console.log('userErrors', data.userErrors);
             
-            
-            // var metaObjectData = data;
+            // TODO: fix this
+            // const customerData = await assignChildToCustomeer(customerId, data.metaobjectUpsert.metaobject.id, res);
+            res.json(data);
         } catch (error) {
             res.status(401).json({ message: error.message });
         }
 
-    } else if (updateType === "upsert mesures") {
+    } else if (updateType === 'mesures') {
         const { handle, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body.fields;
 
         if (typeof pied_gauche_longueur === 'undefined' && typeof pied_gauche_largeur === 'undefined' && typeof pied_droit_longueur === 'undefined' && typeof pied_droit_largeur === 'undefined') {
-            const mesureError = 'You must provide at least one on this parameters in the measure object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
+            const mesureError = 'You must provide at least one on these parameters in the fields object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
             res.status(401).json({ message: mesureError });
         }
 
@@ -97,48 +104,47 @@ router.post("/", async (req, res) => {
         date = new Date(date.getTime() - (offset*60*1000));
         const now = date.toISOString().split('T')[0];
 
-        // const childMesure = (typeof handle === 'undefined') ? `${now}-${first_name}-${customerId}` : handle;
+        const mesureHandle = (typeof handle === 'undefined') ? '' : handle;
 
         const fieldsMesure = [
             {
-                "key": "date_de_la_mesure",
+                "key": metas.mesures.fields.date,
                 "value": `${now}`
             }
         ];
-        
 
         if (typeof pied_gauche_longueur !== 'undefined') {
             fieldsMesure.push({
-                "key": "pied_gauche_longueur",
+                "key": metas.mesures.fields.g_longueur,
                 "value": `${pied_gauche_longueur}`
             })
         }
 
         if (typeof pied_gauche_largeur !== 'undefined') {
             fieldsMesure.push({
-                "key": "pied_gauche_largeur",
+                "key": metas.mesures.fields.g_largeur,
                 "value": `${pied_gauche_largeur}`
             })
         }
 
         if (typeof pied_droit_longueur !== 'undefined') {
             fieldsMesure.push({
-                "key": "pied_droit_longueur",
+                "key": metas.mesures.fields.d_longueur,
                 "value": `${pied_droit_longueur}`
             })
         }
 
         if (typeof pied_droit_largeur !== 'undefined') {
             fieldsMesure.push({
-                "key": "pied_droit_largeur",
+                "key": metas.mesures.fields.d_largeur,
                 "value": `${pied_droit_largeur}`
             })
         }
 
-        let variables = {
+        variables = {
             "handle": {
-                "type": "mm_mesures",
-                "handle": handle
+                "type": metas.mesures.name,
+                "handle": mesureHandle
             },
             "metaobject": {
                 "capabilities" : {
@@ -168,10 +174,7 @@ router.post("/", async (req, res) => {
                     }
                 }
             `;
-
-            // "handle": `${first_name}-${customerId}`
             const { data, errors, extensions } = await shopifyClient.request(customerMetafieldQuery, { variables: variables });
-
         
             if (typeof errors !== 'undefined') {
                 handleErrors(errors, res);
@@ -185,12 +188,75 @@ router.post("/", async (req, res) => {
             res.status(401).json({ message: error.message });
         }
     
-    } 
-    // else if (updateType === "upsert mesure") {
+    } else if (updateType === 'persona') {
+        const {child_id, persona_id} = req.body.fields;
         
+        if (typeof child_id === 'undefined' || typeof persona_id === 'undefined') {
+            res.status(400).json({ error: 'Bad request', message: 'Required "child_id" or "persona_id" parameters not provided.' });
+        }
+
+        // const personaHandle = (typeof handle === 'undefined') ? '' : handle;
+
+         try {
+            const setMetaOjectToMetafield = `
+                mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+                    metafieldsSet(metafields: $metafields) {
+                        metafields {
+                            key
+                            namespace
+                            value
+                        }
+                        userErrors {
+                            field
+                            message
+                            code
+                        }
+                    }
+                }
+            `;
+
+            const metafields = [
+                {
+                    key: metas.customer.enfants.key,
+                    namespace: metas.customer.enfants.namespace,
+                    ownerId: `gid://shopify/Customer/${customerId}`,
+                    type: "metaobject_reference",
+                    value: [metaObjectId]
+                }
+            ];
+
+            console.log('mf', metafields);
+            
+
+            const { data, errors } = await shopifyClient.request(setMetaOjectToMetafield, {
+                variables: {
+                    metafields: {
+                        key: metas.customer.enfants.key,
+                        namespace: metas.customer.enfants.namespace,
+                        ownerId: `gid://shopify/Customer/${customerId}`,
+                        type: "metaobject_reference",
+                        value: [metaObjectId]
+                    }
+                }
+            });
+
+            if (typeof errors !== 'undefined') {
+                handleErrors(errors, res);
+            }
+    console.log('data', data);
+    console.log('errors', errors);
+
+            var setMfdata = data;
+            
+        } catch (error) {
+            res.status(401).json({ message: error.message });
+        }
+
+        return setMfdata;
         
-        
-    // }
+    } else {
+        res.status(400).json({ error: 'Bad request', message: 'Required "updateType" is not either "child", "mesures", "persona".' });
+    }
 
     return;
 
@@ -343,6 +409,65 @@ router.post("/", async (req, res) => {
 
     res.json(metaObjectData);
 });
+
+const assignChildToCustomeer = async (customerId, metaObjectId, res) => {
+    try {
+        const setMetaOjectToMetafield = `
+            mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+                metafieldsSet(metafields: $metafields) {
+                    metafields {
+                        key
+                        namespace
+                        value
+                    }
+                    userErrors {
+                        field
+                        message
+                        code
+                    }
+                }
+            }
+        `;
+
+        const metafields = [
+            {
+                key: metas.customer.enfants.key,
+                namespace: metas.customer.enfants.namespace,
+                ownerId: `gid://shopify/Customer/${customerId}`,
+                type: "metaobject_reference",
+                value: [metaObjectId]
+            }
+        ];
+
+        console.log('mf', metafields);
+        
+
+        const { data, errors } = await shopifyClient.request(setMetaOjectToMetafield, {
+            variables: {
+                metafields: {
+                    key: metas.customer.enfants.key,
+                    namespace: metas.customer.enfants.namespace,
+                    ownerId: `gid://shopify/Customer/${customerId}`,
+                    type: "metaobject_reference",
+                    value: [metaObjectId]
+                }
+            }
+        });
+
+        if (typeof errors !== 'undefined') {
+            handleErrors(errors, res);
+        }
+console.log('data', data);
+console.log('errors', errors);
+
+        var setMfdata = data;
+        
+    } catch (error) {
+        res.status(401).json({ message: error.message });
+    }
+
+    return setMfdata;
+}
 
 const handleErrors = (errors, res) => {
     const errorsMessage = [];

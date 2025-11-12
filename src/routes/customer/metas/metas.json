@@ -1,0 +1,35 @@
+{
+  "customer" : {
+    "enfants": {
+      "namespace": "custom",
+      "key": "mm_kids"
+    }
+  },
+  "enfant": {
+    "name": "mm_profil_enfant",
+    "fields": {
+      "name": "first_name",
+      "birthday": "birthday",
+      "mesures": "mesures",
+      "persona": "personnage",
+      "chaussures": "chaussures_associees"
+    }
+  },
+  "persona": {
+    "name": "mm_personnage_profil_enfant",
+    "fields": {
+      "nom": "nom_du_personnage",
+      "image": "image"
+    }
+  },
+  "mesures": {
+    "name": "mm_mesures",
+    "fields": {
+      "date": "date_de_la_mesure",
+      "g_longeur": "pied_gauche_longueur",
+      "g_largeur": "pied_gauche_largeur",
+      "d_longeur": "pied_droit_longueur",
+      "d_largeur": "pied_droit_largeur"
+    }
+  }
+}
