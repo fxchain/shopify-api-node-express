@@ -4,6 +4,40 @@ import shopifyClient from '../../services/shopifyService.js';
 const router = express.Router();
 router.use(express.json());
 
+
+
+/**
+ * @openapi
+ * /get_token:
+ *    post:
+ *       tags:
+ *         - Authorization
+ *       summary: Retrive a JWT token valid for 1 hour
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json: 
+ *             schema:
+ *               properties:
+ *                 customerId:
+ *                   type: integer
+ *       parameters:
+ *         - in: header
+ *           name: customerId
+ *           description: Shopify customer ID
+ *           required: true
+ *           schema:
+ *             type: integer
+ *       responses:
+ *         '200':
+ *           description: The JWT token
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   token: abc123
+ */
 router.post("/", async (req, res) => {
 	let { customerId, cookie } = req.body;
 
@@ -43,7 +77,7 @@ router.post("/", async (req, res) => {
 					sameSite: 'Strict' // Protect against CSRF
 				});
 			}
-			res.json(jwtToken);
+			res.json({token: jwtToken});
 		} catch (error) {
 			res.status(401).json({ message: 'Authentification failed.' });
 		}

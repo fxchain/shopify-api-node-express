@@ -3,10 +3,21 @@ import auth from './middleware/auth.js';
 import cors from 'cors';
 import getToken from './routes/getToken/index.js';
 import updateCustomerMetas from './routes/customer/metas/index.js';
+import swaggerDocs from './utils/swagger.js';
 
 const app = express();
 
 app.use(express.json());
+
+
+// Handle JSON format errors
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error(err);
+        return res.status(400).send({ status: 400, message: err.message }); // Bad request
+    }
+    next();
+});
 
 // const corsOptions = {
 //   origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
@@ -44,6 +55,8 @@ app.get('/', (req, res) => {
 if (process.env.ENVIRONMENT === 'development') {
   app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
+
+    swaggerDocs(app, 3000);
   });
 }
 // else {

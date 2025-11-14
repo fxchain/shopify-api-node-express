@@ -1,0 +1,63 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PPDG REST API Docs",
+    "version": "1.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/get_token": {
+      "post": {
+        "tags": [
+          "Authorization"
+        ],
+        "summary": "Retrive a JWT token valid for 1 hour",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": null
+          }
+        },
+        "parameters": [
+          {
+            "name": "customerId",
+            "description": "Shopify customer ID",
+            "required": true,
+            "schema": {
+              "type": "interger"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "json",
+                  "example": {
+                    "token": "abc123"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}
