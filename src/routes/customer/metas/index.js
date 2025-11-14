@@ -5,6 +5,91 @@ import metas from './metas.json' with { type: "json" };
 const router = express.Router();
 
 //TODO: readd auth
+/**
+ * @openapi
+ * /update_customer_metas:
+ *    post:
+ *       tags:
+ *         - Update Shopify metas
+ *       summary: Updates customer metafields and metaobjets
+ *       requestBody:
+ *         description: When handle is not provided, it will create a new metaobject entry. Parameter "fields.first_name" is required.
+ *         required: true
+ *         content:
+ *           application/json: 
+ *             schema:
+ *               properties:
+ *                 updateType:
+ *                   type: string
+ *                   enum: ["child", "mesures"]
+ *                 fields:
+ *                   type: object
+ *                   required:
+ *                     - first_name
+ *                   properties:
+ *                     handle:
+ *                       type: string
+ *                     first_name:
+ *                       type: string
+ *                     birthday:
+ *                       type: string
+ *                       description: A date in the YYYY-MM-DD format
+ *                     chaussures_associees:
+ *                       type: string
+ *                       description: A list of product IDs seperated by commas
+ *                     persona:
+ *                       type: integer
+ *                       description: The person metaobject ID
+ *                   example:
+ *                     handle: Victor-12547
+ *                     first_name: Victor
+ *                     birthday: 2018-05-15
+ *                     chaussures_associees: 1234567890,0987654321
+ *                     persona: 1234567890
+ *                 current_kids:
+ *                   type: string
+ *                   description: A list of kids metaobject IDs currently associeded with the Customer. If not provided, they will be overwritten.
+ *                   example: 1234567890,0987654321
+ *       responses:
+ *         '200':
+ *           description: Update to Shopify's metas successful
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   metaobjectUpsert:
+ *                     metaobject:
+ *                       id: 1234567890
+ *                       handle: Victore-12345
+ *                       fields:
+ *                         key: first_name
+ *                         value: Victor
+ *         '400':
+ *           description: Bad Request.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Authentification failed
+ *         '401':
+ *           description: Unauthorized - The JWT token was not provided, expired, or wrong.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Authentification failed
+ *         '500':
+ *           description: Internal Server Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Internal Server Error
+ */
 router.post("/", async (req, res) => {
     // const customerId = req.customerId;
     const customerId = 8643416850746;
@@ -107,7 +192,7 @@ router.post("/", async (req, res) => {
                 customerData
             });
         } catch (error) {
-            res.status(401).json({ message: error.message });
+            res.status(500).json({ message: error.message });
         }
 
         
@@ -121,7 +206,7 @@ router.post("/", async (req, res) => {
 
         if (typeof kidHandle === 'undefined') {
             const kidHandleError = 'You must provide the "fields.kidHandle" parameter.'
-            res.status(401).json({ message: kidHandleError });
+            res.status(400).json({ message: kidHandleError });
         }
 
         let date = new Date();
@@ -215,7 +300,7 @@ router.post("/", async (req, res) => {
                 data
             })
         } catch (error) {
-            res.status(401).json({ message: error.message });
+            res.status(500).json({ message: error.message });
         }
     
     } 
@@ -408,7 +493,7 @@ const assignChildsToCustomer = async (customerId, metaObjectIds, res) => {
 
         var setMfdata = data;
     } catch (error) {
-        res.status(401).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 
     return setMfdata;
@@ -457,7 +542,7 @@ const assignMesureToChild = async (kidHandle, mesureId, res) => {
 
         return data;
     } catch (error) {
-        res.status(401).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 

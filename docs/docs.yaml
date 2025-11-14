@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  title: PPDG REST API Docs
+  version: 1.0.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
+tags:
+  - name: Authorization
+  - name: Update Shopify metas
+paths:
+  /update_customer_metas:
+    post:
+      tags:
+        - Update Shopify metas
+      summary: Updates customer metafields and metaobjets
+      requestBody:
+        description: >-
+          When handle is not provided, it will create a new metaobject entry.
+          Parameter "fields.first_name" is required.
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                updateType:
+                  type: string
+                  enum:
+                    - child
+                    - mesures
+                fields:
+                  type: object
+                  required:
+                    - first_name
+                  properties:
+                    handle:
+                      type: string
+                    first_name:
+                      type: string
+                    birthday:
+                      type: string
+                      description: A date in the YYYY-MM-DD format
+                    chaussures_associees:
+                      type: string
+                      description: A list of product IDs seperated by commas
+                    persona:
+                      type: integer
+                      description: The person metaobject ID
+                  example:
+                    handle: Victor-12547
+                    first_name: Victor
+                    birthday: '2018-05-15'
+                    chaussures_associees: 1234567890,0987654321
+                    persona: 1234567890
+                current_kids:
+                  type: string
+                  description: >-
+                    A list of kids metaobject IDs currently associeded with the
+                    Customer. If not provided, they will be overwritten.
+                  example: 1234567890,0987654321
+      responses:
+        '200':
+          description: Update to Shopify's metas successful
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  metaobjectUpsert:
+                    metaobject:
+                      id: 1234567890
+                      handle: Victore-12345
+                      fields:
+                        key: first_name
+                        value: Victor
+        '401':
+          description: API call failed.
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Authentification failed
+  /get_token:
+    post:
+      tags:
+        - Authorization
+      summary: Retrive a JWT token valid for 1 hour
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                customerId:
+                  type: integer
+      responses:
+        '200':
+          description: The JWT token
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  token: abc123
+        '401':
+          description: Authentification failed (most likely wrong Shopify customer ID).
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  message: Authentification failed

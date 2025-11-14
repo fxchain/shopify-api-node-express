@@ -24,6 +24,7 @@ const options = {
         bearerAuth: [],
       },
     ],
+    tags: [{name: "Authorization"}, {name: "Update Shopify metas"}]
   },
   apis: ["./src/routes/**/*.js"],
 };

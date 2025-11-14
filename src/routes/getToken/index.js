@@ -4,8 +4,6 @@ import shopifyClient from '../../services/shopifyService.js';
 const router = express.Router();
 router.use(express.json());
 
-
-
 /**
  * @openapi
  * /get_token:
@@ -13,6 +11,7 @@ router.use(express.json());
  *       tags:
  *         - Authorization
  *       summary: Retrive a JWT token valid for 1 hour
+ *       security: []
  *       requestBody:
  *         required: true
  *         content:
@@ -21,13 +20,7 @@ router.use(express.json());
  *               properties:
  *                 customerId:
  *                   type: integer
- *       parameters:
- *         - in: header
- *           name: customerId
- *           description: Shopify customer ID
- *           required: true
- *           schema:
- *             type: integer
+ *                   example: 123456789
  *       responses:
  *         '200':
  *           description: The JWT token
@@ -37,6 +30,22 @@ router.use(express.json());
  *                 type: object
  *                 example:
  *                   token: abc123
+ *         '401':
+ *           description: Authentification failed (most likely wrong Shopify customer ID).
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Authentification failed
+ *         '500':
+ *           description: Internal Server Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Internal Server Error
  */
 router.post("/", async (req, res) => {
 	let { customerId, cookie } = req.body;
@@ -82,7 +91,7 @@ router.post("/", async (req, res) => {
 			res.status(401).json({ message: 'Authentification failed.' });
 		}
 	} else {
-		res.status(401).json({ message: 'Authentification failed.' });
+		res.status(500).json({ message: 'Internal Server Error' });
 	}
 });
 export default router;
