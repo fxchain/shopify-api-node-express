@@ -21,11 +21,9 @@ const router = express.Router();
  *               properties:
  *                 updateType:
  *                   type: string
- *                   enum: ["child", "mesures"]
+ *                   enum: ["upsertChild", "upsertmeasures", "deleteChild", deletemeasure]
  *                 fields:
  *                   type: object
- *                   required:
- *                     - first_name
  *                   properties:
  *                     handle:
  *                       type: string
@@ -92,7 +90,7 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
     // const customerId = req.customerId;
-    const customerId = 8643416850746;
+    const customerId = 8643416850746;  
 
     const updateType = req.body.updateType;
 
@@ -102,11 +100,12 @@ router.post("/", async (req, res) => {
     }
     let variables;
 
-    if (updateType === 'child') {
+    if (updateType === 'upsertChild') {
         const {handle, first_name, birthday, persona, chaussures_associees} = req.body.fields;
         
-        if (typeof first_name === 'undefined') {
-            res.status(400).json({ error: 'Bad request', message: 'Required "fields.first_name" parameter not provided.' });
+        if (typeof first_name === 'undefined' && typeof handle === 'undefined') {
+            res.status(400).json({ error: 'Bad request', message: 'You must provide at least of of "fields.first_name" or "fields.handle" parameters.' });
+            return;
         }
         const childHandle = (typeof handle === 'undefined') ? '' : handle;
 
@@ -115,15 +114,19 @@ router.post("/", async (req, res) => {
         ]
 
         if (typeof birthday !== 'undefined') {
-           fieldsProfilEnfant.push({"key": metas.enfant.fields.birthday, "value": birthday}); 
+            fieldsProfilEnfant.push({"key": metas.enfant.fields.birthday, "value": birthday}); 
         }
 
         if (typeof chaussures_associees !== 'undefined') {
-           fieldsProfilEnfant.push({"key": metas.enfant.fields.chaussures, "value": chaussures_associees}); 
+            // const chaussures = chaussures_associees.split(',')
+            // const chaussures = chaussures_associees.map((chaussure) => {
+            //     return 
+            // });
+            fieldsProfilEnfant.push({"key": metas.enfant.fields.chaussures, "value": JSON.stringify(chaussures_associees)}); 
         }
 
         if (typeof persona !== 'undefined') {
-           fieldsProfilEnfant.push({"key": metas.enfant.fields.persona, "value": `gid://shopify/Metaobject/${persona}`}); 
+            fieldsProfilEnfant.push({"key": metas.enfant.fields.persona, "value": `gid://shopify/Metaobject/${persona}`}); 
         }
 
         variables = {
@@ -193,20 +196,23 @@ router.post("/", async (req, res) => {
             });
         } catch (error) {
             res.status(500).json({ message: error.message });
+            return;
         }
 
         
-    } else if (updateType === 'mesures') {
-        const { handle, kidHandle, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body.fields;
+    } else if (updateType === 'upsertmeasures') {
+        const { handle, childId, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body.fields;
 
         if (typeof pied_gauche_longueur === 'undefined' && typeof pied_gauche_largeur === 'undefined' && typeof pied_droit_longueur === 'undefined' && typeof pied_droit_largeur === 'undefined') {
-            const mesureError = 'You must provide at least one on these parameters in the fields object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
-            res.status(401).json({ message: mesureError });
+            const measureError = 'You must provide at least one on these parameters in the fields object: pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur'
+            res.status(400).json({ message: measureError });
+            return;
         }
 
-        if (typeof kidHandle === 'undefined') {
-            const kidHandleError = 'You must provide the "fields.kidHandle" parameter.'
-            res.status(400).json({ message: kidHandleError });
+        if (typeof childId === 'undefined') {
+            const childIdError = 'You must provide the "fields.childId" parameter.'
+            res.status(400).json({ message: childIdError });
+            return;
         }
 
         let date = new Date();
@@ -214,50 +220,47 @@ router.post("/", async (req, res) => {
         date = new Date(date.getTime() - (offset*60*1000));
         const now = date.toISOString().split('T')[0];
 
-        const mesureHandle = (typeof handle === 'undefined') ? '' : handle;
+        const measureHandle = (typeof handle === 'undefined') ? '' : handle;
 
-        const fieldsMesure = [
+        const fieldsmeasure = [
             {
-                "key": metas.mesures.fields.date,
+                "key": metas.measures.fields.date,
                 "value": `${now}`
             }
         ];
 
         if (typeof pied_gauche_longueur !== 'undefined') {
-            fieldsMesure.push({
-                "key": metas.mesures.fields.g_longeur,
+            fieldsmeasure.push({
+                "key": metas.measures.fields.g_longeur,
                 "value": `${pied_gauche_longueur}`
             })
         }
 
         if (typeof pied_gauche_largeur !== 'undefined') {
-            fieldsMesure.push({
-                "key": metas.mesures.fields.g_largeur,
+            fieldsmeasure.push({
+                "key": metas.measures.fields.g_largeur,
                 "value": `${pied_gauche_largeur}`
             })
         }
 
         if (typeof pied_droit_longueur !== 'undefined') {
-            fieldsMesure.push({
-                "key": metas.mesures.fields.d_longeur,
+            fieldsmeasure.push({
+                "key": metas.measures.fields.d_longeur,
                 "value": `${pied_droit_longueur}`
             })
         }
 
         if (typeof pied_droit_largeur !== 'undefined') {
-            fieldsMesure.push({
-                "key": metas.mesures.fields.d_largeur,
+            fieldsmeasure.push({
+                "key": metas.measures.fields.d_largeur,
                 "value": `${pied_droit_largeur}`
             })
         }
 
-        console.log('fieldsMesure', fieldsMesure);
-        
-
         variables = {
             "handle": {
-                "type": metas.mesures.name,
-                "handle": mesureHandle
+                "type": metas.measures.name,
+                "handle": measureHandle
             },
             "metaobject": {
                 "capabilities" : {
@@ -265,14 +268,12 @@ router.post("/", async (req, res) => {
                         "status": 'ACTIVE'
                     }
                 },
-                "fields": fieldsMesure
+                "fields": fieldsmeasure
             }
-        };
-        console.log("variables", JSON.stringify(variables));
-        
+        };        
 
         try {
-            const mesuresMetafieldQuery = `
+            const measuresMetafieldQuery = `
                 mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
                     metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
                         metaobject {
@@ -287,174 +288,140 @@ router.post("/", async (req, res) => {
                     }
                 }
             `;
-            const { data, errors, extensions } = await shopifyClient.request(mesuresMetafieldQuery, { variables: variables });
+            const { data, errors, extensions } = await shopifyClient.request(measuresMetafieldQuery, { variables: variables });
         
             if (typeof errors !== 'undefined') {
                 handleErrors(errors, res);
                 return;
             }
-            const mesureData = await assignMesureToChild(kidHandle, data.metaobjectUpsert.metaobject.id, res);
 
+            if (typeof handle === 'undefined') {
+                await assignmeasureToChild(childId, data.metaobjectUpsert.metaobject.id, res);
+            }
 
             res.json({
                 data
             })
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            res.status(500).json({ message: error.message + '0'});
+            return;
         }
-    
-    } 
+    } else if (updateType === 'deleteChild') {
+        const { childId } = req.body;
 
-    return;
+        if (typeof childId === 'undefined') {
+            const childIdError = 'You must provide the child\'s "childId" parameter.'
+            res.status(400).json({ message: deleteHandleError });
+            return;
+        }
 
-    // Check if metaobject is set for the customer
-    try {
-        const customerMetafieldQuery = `
-            query CustomerMetafieldQuery($id: ID!){
-                customer(id: $id) {
-                    id
-                    metafield(namespace: ${metafieldNamespace}, key: ${metafieldKey}) {
+        try {
+            const getChildMetaobjectQuery = `{
+                metaobject(id: "gid://shopify/Metaobject/${childId}") {
+                    handle
+                    field (key: "${metas.enfant.fields.measures}") {
                         value
                     }
                 }
-            }
-        `;
+            }`;
 
-        const { data, errors } = await shopifyClient.request(customerMetafieldQuery, {
-            variables: {
-                id: `gid://shopify/Customer/${customerId}`,
-            },
-        });
+            const { data, errors} = await shopifyClient.request(getChildMetaobjectQuery);
+
+            var dataChild = data;
+
         
-        if (typeof errors !== 'undefined') {
-            handleErrors(errors, res);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
-        
-        var metaObjectData = data;
-    } catch (error) {
-        res.status(401).json({ message: error.message });
-    }
-    console.log("metaObjectData", metaObjectData);
-    
 
-    return;
-    // If metafield is not set, we need to assign the metaObject to the customer
-    if (typeof metaObjectData !== 'undefined') {
-        if (metaObjectData.customer?.metafields === null) {
-            console.log('getting mo id');
-            // First get the metaobject id
-            try {
-                const getMetaobjectId = `
-                    {
-                        metaobjects(first: 5, type: ${metafieldKey}) {
-                            nodes {
-                                id
-                            }
-                        }
-                    }
-                `;
-                const { data, errors, extensions } = await shopifyClient.request(getMetaobjectId);
-                var metaObjectId = data.metaobjects.nodes[0].id;
-            } catch (error) {
-                res.status(401).json({ message: error.message });
-            }
+        if (dataChild.metaobject.field.value !== null) {
+            const measuresString = dataChild.metaobject.field.value.replace('[', '').replace(']', '').replaceAll('"', '');
+            const measureIds = measuresString.split(',');
 
-            console.log('setting mf');
-            // Then we set the metafield with the metaobject id
-            try {
-                const setMetaOjectToMetafield = `
-                    mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
-                        metafieldsSet(metafields: $metafields) {
-                            metafields {
-                                key
-                                namespace
-                                value
-                            }
-                            userErrors {
-                                field
-                                message
-                                code
-                            }
-                        }
-                    }
-                `;
-
-                const { data, errors, extensions } = await shopifyClient.request(setMetaOjectToMetafield, {
-                    variables: {
-                        metafields: [
-                            {
-                                key: metafieldKey,
-                                namespace: metafieldNamespace,
-                                ownerId: `gid://shopify/Customer/${customerId}`,
-                                type: "metaobject_reference",
-                                value: metaObjectId
-                            }
-                        ]
-                    },
-                });
-                var setMfdata = data;
-                console.log("setMfdata", setMfdata);
-                console.log("errors", errors);
-                
-            } catch (error) {
-                res.status(401).json({ message: error.message });
-            }
-        }
-    }
-
-    // Finally, we add/update the metaobject with posted data
-    console.log('updating metaobject');
-    console.log('req.body', req);
-
-    const { pointure_droite, pointure_gauche } = req;
-    console.log("pointure_droite", pointure_droite);
-    console.log("pointure_gauche", pointure_gauche);
-    
-    try {
-        const updateCustomerMetaObject = `
-            mutation UpdateMetaobject($id: ID!, $metaobject: MetaobjectUpdateInput!) {
-                metaobjectUpdate(id: $id, metaobject: $metaobject) {
-                    metaobject {
-                        handle
-                        chaussures: field(key: ${metafieldKey}) {
-                            value
-                        }
-                    }
-                    userErrors {
-                        field
-                        message
-                        code
-                    }
+            variables = {
+                "where": {
+                    "ids": measureIds
                 }
             }
-        `;
-
-        const { data, errors } = await shopifyClient.request(updateCustomerMetaObject, {
-            variables: {
-                "id": "gid://shopify/Metaobject/158929289530",
-                "metaobject": {
-                    "fields": [
-                        {
-                            "key": "pointure_droite",
-                            "value": "[\"15\", \"16\"]"
-                        },
-                        {
-                            "key": "pointure_gauche",
-                            "value": "[\"40\", \"41\"]"
+            const deleteMetaobjectsQuery = `
+                mutation DeleteMetaobjects($where: MetaobjectBulkDeleteWhereCondition!) {
+                    metaobjectBulkDelete(where: $where) {
+                        job {
+                            id
+                            done
                         }
-                    ]
+                    }
                 }
-            },
-        });
-        var metaObjectData = data;
-        console.log("metaObjectData", metaObjectData);
-        console.log("errors", errors);
-        
-    } catch (error) {
-        res.status(401).json({ message: error.message });
-    }
+            `;
+            const { data, errors} = await shopifyClient.request(deleteMetaobjectsQuery, { variables: variables });
+        }
 
-    res.json(metaObjectData);
+        try {
+            variables = {
+                "id": `gid://shopify/Metaobject/${childId}`
+            };
+
+            const deleteMetaobjectQuery = `
+                mutation DeleteMetaobject($id: ID!) {
+                    metaobjectDelete(id: $id) {
+                        deletedId
+                        userErrors {
+                            field
+                            message
+                            code
+                        }
+                    }
+                }
+            `;
+            // 
+            const { data, errors } = await shopifyClient.request(deleteMetaobjectQuery, { variables: variables });
+        
+            if (typeof errors !== 'undefined') {
+                handleErrors(errors, res);
+                return;
+            }
+
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+            return;
+        }
+    } else if (updateType === 'deletemeasure') {
+        const { measureId } = req.body;
+        
+        try {
+            variables = {
+                "id": `gid://shopify/Metaobject/${measureId}`
+            };
+
+            const deleteMetaobjectQuery = `
+                mutation DeleteMetaobject($id: ID!) {
+                    metaobjectDelete(id: $id) {
+                        deletedId
+                        userErrors {
+                            field
+                            message
+                            code
+                        }
+                    }
+                }
+            `;
+            const { data, errors } = await shopifyClient.request(deleteMetaobjectQuery, { variables: variables });
+        
+            if (typeof errors !== 'undefined') {
+                handleErrors(errors, res);
+                return;
+            }
+
+            res.json(data);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+            return;
+        }
+    } else {
+        res.status(400).json({ message: `updateType '${updateType}' does not exist` });
+        return;
+    }
 });
 
 const assignChildsToCustomer = async (customerId, metaObjectIds, res) => {
@@ -499,9 +466,48 @@ const assignChildsToCustomer = async (customerId, metaObjectIds, res) => {
     return setMfdata;
 }
 
-const assignMesureToChild = async (kidHandle, mesureId, res) => {
+const assignmeasureToChild = async (childId, measureId, res) => {
     try {
-        const mesureMetafieldQuery = `
+        // Get current child handle and measures IDs
+        const getChildMetaobjectQuery = `{
+            metaobject(id: "gid://shopify/Metaobject/${childId}") {
+                handle
+                field (key: "${metas.enfant.fields.measures}") {
+                    value
+                }
+            }
+        }`;
+
+        const { data, errors} = await shopifyClient.request(getChildMetaobjectQuery);
+
+        var dataChild = data;
+    console.log('getChildMetaobjectQuery', getChildMetaobjectQuery);
+    console.log('dataChild', data);
+    console.log('errorsChild', errors);
+
+       
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+    
+    let measuresIds = measureId;
+
+    if (dataChild.metaobject.field.value !== null && !dataChild.metaobject.field.value.includes(measureId)) {
+        const cleaned = dataChild.metaobject.field.value.replace(']', '');
+        measuresIds = `${cleaned},"${measureId}"]`;
+    } else {
+        measuresIds = `["${measureId}"]`;
+    }
+    
+    console.log("dataChild.metaobject.handle", dataChild.metaobject.handle);
+    console.log("measuresIds", measuresIds);
+    
+    // return;
+    
+
+
+    try {
+        const measureMetafieldQuery = `
             mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
                 metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
                     metaobject {
@@ -524,26 +530,39 @@ const assignMesureToChild = async (kidHandle, mesureId, res) => {
         const variables =  {
             "handle": {
                 "type": metas.enfant.name,
-                "handle": kidHandle
+                "handle": dataChild.metaobject.handle
             },
             "metaobject": {
                 "fields": {
-                    "key": metas.enfant.fields.mesures,
-                    "value": mesureId
+                    "key": metas.enfant.fields.measures,
+                    "value": measuresIds
                 }
             }
         }
-        const { data, errors } = await shopifyClient.request(mesureMetafieldQuery, { variables: variables });
+        console.log('variables', variables);
+        
+        const { data, errors } = await shopifyClient.request(measureMetafieldQuery, { variables: variables });
 
-        if (typeof errors !== 'undefined') {
-            handleErrors(errors, res);
-            return;
+        // if (typeof errors !== 'undefined') {
+        //     handleErrors(errors, res);
+        //     return;
+        // }
+
+        if (data.metaobjectUpsert.userErrors.length > 0) {
+            console.log('data.metaobjectUpsert.userErrors', data.metaobjectUpsert.userErrors);
+            
         }
 
-        return data;
+        console.log('data', JSON.stringify(data));
+        
+        var measuresData;
+
+        // return data;
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+
+    return measuresData;
 }
 
 const handleErrors = (errors, res) => {

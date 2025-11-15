@@ -1,4 +1,4 @@
-import express from "express";
+// import express from "express";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import packageFile from "../../package.json" with { type: "json" };
@@ -7,7 +7,7 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "PPDG REST API Docs",
+      title: "PPDG middleware REST API docs",
       version: packageFile.version,
     },
     components: {
@@ -24,9 +24,9 @@ const options = {
         bearerAuth: [],
       },
     ],
-    tags: [{name: "Authorization"}, {name: "Update Shopify metas"}]
+    tags: [{name: "Authorization"}, {name: "Childs metaobject"}]
   },
-  apis: ["./src/routes/**/*.js"],
+  apis: ["./src/serer.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
@@ -42,6 +42,7 @@ function swaggerDocs(app, port) {
   });
 
   console.log(`Docs available at http://localhost:${port}/docs`);
+  console.log(`Docs in a JSON format available at http://localhost:${port}/docs.json`);
 }
 
 export default swaggerDocs;

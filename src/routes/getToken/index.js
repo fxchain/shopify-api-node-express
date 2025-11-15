@@ -6,7 +6,7 @@ router.use(express.json());
 
 /**
  * @openapi
- * /get_token:
+ * /api/get_token:
  *    post:
  *       tags:
  *         - Authorization
