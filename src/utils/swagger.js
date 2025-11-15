@@ -7,7 +7,7 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "PPDG middleware REST API docs",
+      title: "PPDG Shopify middleware REST API docs",
       version: packageFile.version,
     },
     components: {
@@ -24,9 +24,9 @@ const options = {
         bearerAuth: [],
       },
     ],
-    tags: [{name: "Authorization"}, {name: "Childs metaobject"}]
+    tags: [{name: "Authorization"}, {name: "Childs metaobject"}, {name: "Measures metaobject"}]
   },
-  apis: ["./src/serer.js"],
+  apis: ["./src/routes/**/*.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);

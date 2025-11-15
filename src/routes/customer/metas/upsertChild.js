@@ -1,10 +1,87 @@
 import express, { json } from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
-import metas from './metas.json' with { type: "json" };
+import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
 
-//TODO: readd auth
+
+/**
+ * @openapi
+ * /api/customer/upsert_child:
+ *    post:
+ *       tags:
+ *         - Childs metaobject
+ *       summary: Add or updates child Shopify metaobjet
+ *       requestBody:
+ *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it. When parameter "handle" is not provided, the parameter "first_name" is required.
+ *         required: true
+ *         content:
+ *           application/json: 
+ *             schema:
+ *               properties:
+ *                handle:
+ *                  type: string
+ *                first_name:
+ *                  type: string
+ *                birthday:
+ *                  type: string
+ *                  description: A date in the YYYY-MM-DD format
+ *                chaussures_associees:
+ *                  type: array
+ *                  description: An array of product IDs
+ *                persona:
+ *                  type: integer
+ *                  description: The person metaobject ID
+ *                current_kids:
+ *                  type: array
+ *                  description: An array of kids metaobject IDs currently associeded with the Customer. If not provided, they will be overwritten.
+ *               example:
+ *                handle: Victor-12547
+ *                first_name: Victor
+ *                birthday: 2018-05-15
+ *                chaussures_associees: [1234567890,0987654321]
+ *                persona: 1234567890
+ *       responses:
+ *         '200':
+ *           description: Update to child's metas successful
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   data:
+ *                     metaobjectUpsert:
+ *                       metaobject:
+ *                         id: 1234567890
+ *                         handle: Victore-12345
+ *                         fields:
+ *                           key: first_name
+ *                           value: Victor
+ *         '400':
+ *           description: Bad Request.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Parameter 'first_name' was not provided.
+ *         '401':
+ *           description: Unauthorized - The JWT token was not provided, expired, or wrong.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Authentification failed
+ *         '500':
+ *           description: Internal Server Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 example:
+ *                   message: Internal Server Error
+ */
 router.post("/", async (req, res) => {
   // const customerId = req.customer
   const customerId = 8643416850746;

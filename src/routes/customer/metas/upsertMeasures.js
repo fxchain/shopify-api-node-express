@@ -2,7 +2,7 @@ import express from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
 import handleErrors from '../../../utils/handleErrors.js'
-import metas from './metas.json' with { type: "json" };
+import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
 
 //TODO: readd auth
@@ -12,8 +12,9 @@ const router = express.Router();
  *    post:
  *       tags:
  *         - Measures metaobject
- *       summary: Updates measure Shopify metafields and metaobjets
+ *       summary: Add or updates measure Shopify metafields and metaobjets
  *       requestBody:
+ *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it.
  *         required: true
  *         content:
  *           application/json: 

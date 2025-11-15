@@ -1,6 +1,6 @@
 import express, { json } from 'express';
-import shopifyClient from '../../../services/shopifyService.js';
-import auth from '../../../middleware/auth.js';
+import shopifyClient from './services/shopifyService.js';
+import auth from './middleware/auth.js';
 import metas from './metas.json' with { type: "json" };
 const router = express.Router();
 
