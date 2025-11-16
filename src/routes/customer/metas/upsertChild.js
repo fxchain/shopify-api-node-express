@@ -1,9 +1,9 @@
 import express, { json } from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
+import handleErrors from '../../../utils/handleErrors.js';
 import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
-
 
 /**
  * @openapi
@@ -43,7 +43,7 @@ const router = express.Router();
  *                persona: 1234567890
  *       responses:
  *         '200':
- *           description: Update to child's metas successful
+ *           description: Update to child's metas successful. Shopify sometimes retruns erorrs with a 200 status. They will be stored in the userError array.
  *           content:
  *             application/json:
  *               schema:
@@ -57,6 +57,7 @@ const router = express.Router();
  *                         fields:
  *                           key: first_name
  *                           value: Victor
+ *                       userErrors: []
  *         '400':
  *           description: Bad Request.
  *           content:
@@ -82,7 +83,7 @@ const router = express.Router();
  *                 example:
  *                   message: Internal Server Error
  */
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   // const customerId = req.customer
   const customerId = 8643416850746;
   let variables;
@@ -90,7 +91,7 @@ router.post("/", async (req, res) => {
   const { handle, first_name, birthday, persona, chaussures_associees } = req.body;
 
   if (typeof first_name === 'undefined' && typeof handle === 'undefined') {
-    res.status(400).json({ error: 'Bad request', message: 'You must provide at least of of "first_name" or "handle" parameters.' });
+    res.status(400).json({ error: 'Bad request', message: 'You must provide at least of of \'first_name\' or \'handle\' parameters.' });
     return;
   }
   const childHandle = (typeof handle === 'undefined') ? '' : handle;
@@ -150,7 +151,7 @@ router.post("/", async (req, res) => {
     const { data, errors } = await shopifyClient.request(customerMetafieldQuery, { variables: variables });
 
     if (typeof errors !== 'undefined') {
-      handleErrors(errors, res);
+      handleErrors(errors, false, res);
       return;
     }
 
@@ -159,8 +160,6 @@ router.post("/", async (req, res) => {
     ];
 
     if (typeof req.body.current_kids !== 'undefined' && req.body.current_kids.length > 0) {
-      // const currentkids = req.body.current_kids.split(',');
-
       req.body.current_kids.forEach((id) => {
         const kidId = `gid://shopify/Metaobject/${id}`;
 
@@ -184,21 +183,21 @@ router.post("/", async (req, res) => {
 const assignChildsToCustomer = async (customerId, metaObjectIds, res) => {
   try {
     const setMetaOjectToMetafield = `
-            mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
-                metafieldsSet(metafields: $metafields) {
-                    metafields {
-                        key
-                        namespace
-                        value
-                    }
-                    userErrors {
-                        field
-                        message
-                        code
-                    }
-                }
-            }
-        `;
+      mutation MetafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) {
+          metafields {
+            key
+            namespace
+            value
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `;
 
     const { data, errors } = await shopifyClient.request(setMetaOjectToMetafield, {
       variables: {
@@ -211,9 +210,8 @@ const assignChildsToCustomer = async (customerId, metaObjectIds, res) => {
       }
     });
 
-
     if (typeof errors !== 'undefined') {
-      handleErrors(errors, res);
+      handleErrors(errors, false, res);
       return;
     }
 

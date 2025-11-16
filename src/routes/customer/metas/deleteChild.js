@@ -1,10 +1,10 @@
 import express, { json } from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
+import handleErrors from '../../../utils/handleErrors.js';
 import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
 
-//TODO: readd auth
 /**
  * @openapi
  * /api/customer/child/delete:
@@ -59,7 +59,7 @@ const router = express.Router();
  *                 example:
  *                   message: Internal Server Error
  */
-router.delete("/", async (req, res) => {
+router.delete("/", auth, async (req, res) => {
   // const customerId = req.customer
   const customerId = 8643416850746;
   let variables;
@@ -84,7 +84,7 @@ router.delete("/", async (req, res) => {
     const { data, errors } = await shopifyClient.request(getChildMetaobjectQuery);
 
     if (typeof errors !== 'undefined') {
-        handleErrors(errors, res);
+        handleErrors(errors, false, res);
         return;
     }
 
@@ -106,6 +106,7 @@ router.delete("/", async (req, res) => {
         "ids": measureIds
       }
     }
+
     const deleteMetaobjectsQuery = `
       mutation DeleteMetaobjects($where: MetaobjectBulkDeleteWhereCondition!) {
         metaobjectBulkDelete(where: $where) {
@@ -139,7 +140,7 @@ router.delete("/", async (req, res) => {
     const { data, errors } = await shopifyClient.request(deleteMetaobjectQuery, { variables: variables });
 
     if (typeof errors !== 'undefined') {
-      handleErrors(errors, res);
+      handleErrors(errors, false, res);
       return;
     }
 

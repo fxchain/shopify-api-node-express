@@ -10,7 +10,7 @@
     "fields": {
       "name": "first_name",
       "birthday": "birthday",
-      "mesures": "mesures",
+      "measures": "mesures",
       "persona": "personnage",
       "chaussures": "chaussures_associees"
     }
@@ -22,7 +22,7 @@
       "image": "image"
     }
   },
-  "mesures": {
+  "measures": {
     "name": "mm_mesures",
     "fields": {
       "date": "date_de_la_mesure",

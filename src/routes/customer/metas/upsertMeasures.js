@@ -1,11 +1,10 @@
 import express from 'express';
 import shopifyClient from '../../../services/shopifyService.js';
 import auth from '../../../middleware/auth.js';
-import handleErrors from '../../../utils/handleErrors.js'
+import handleErrors from '../../../utils/handleErrors.js';
 import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
 
-//TODO: readd auth
 /**
  * @openapi
  * /api/customer/measure/upsert:
@@ -42,7 +41,7 @@ const router = express.Router();
  *                 pied_droit_largeur: 4.2
  *       responses:
  *         '200':
- *           description: Update to measure's metas successful
+ *           description: Update to measure's metas successful. Shopify sometimes retruns erorrs with a 200 status. They will be stored in the userErrors array.
  *           content:
  *             application/json:
  *               schema:
@@ -79,14 +78,14 @@ const router = express.Router();
  *                 example:
  *                   message: Internal Server Error
  */
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   // const customerId = req.customer
   const customerId = 8643416850746;
   let variables;
   const { handle, childId, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body;
 
   if (typeof childId === 'undefined') {
-    const childIdError = 'You must provide the "childId" parameter.'
+    const childIdError = 'You must provide the \'childId\' parameter.'
     res.status(400).json({ message: childIdError });
     return;
   }
@@ -178,23 +177,21 @@ router.post("/", async (req, res) => {
     if (typeof errors !== 'undefined') {
       handleErrors(errors, false, res);
       return;
-    }
+    }    
 
-    if (typeof data.metaobjectUpsert.userError.length > 0) {
-      handleErrors(data.metaobjectUpsert.userError, true, res);
+    if (typeof data.metaobjectUpsert.userErrors.length > 0) {
+      handleErrors(data.metaobjectUpsert.userErrors, true, res);
       return;
     }
-
-    if (typeof handle === 'undefined') {
-      const childData = await assignmeasureToChild(childId, data.metaobjectUpsert.metaobject.id, res);
-    }
+    const childData = await assignmeasureToChild(childId, data.metaobjectUpsert.metaobject.id, res);
 
     res.json({
       data,
       childData
-    })
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message + "01" });
     return;
   }
 });
@@ -217,11 +214,6 @@ const assignmeasureToChild = async (childId, measureId, res) => {
       return;
     }
 
-    if (typeof data.metaobject.userError.length > 0) {
-      handleErrors(data.metaobject.userError, true, res);
-      return;
-    }
-
     var dataChild = data;
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -236,6 +228,8 @@ const assignmeasureToChild = async (childId, measureId, res) => {
   }
 
   try {
+    console.log('dataChild', dataChild);
+    
     const measureMetafieldQuery = `
       mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
         metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
@@ -275,8 +269,8 @@ const assignmeasureToChild = async (childId, measureId, res) => {
       return;
     }
     
-    if (typeof data.userError.length > 0) {
-      handleErrors(data.metaobjectUpsert.userError, true, res);
+    if (typeof data.metaobjectUpsert.userErrors.length > 0) {
+      handleErrors(data.metaobjectUpsert.userErrors, true, res);
       return;
     }
 

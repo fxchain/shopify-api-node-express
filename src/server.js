@@ -4,8 +4,9 @@ import cors from 'cors';
 import getToken from './routes/getToken/index.js';
 // import updateCustomerMetas from './routes/customer/metas/index.js';
 import updateChildMetas from './routes/customer/metas/upsertChild.js';
-import updatemeasureMetas from './routes/customer/metas/upsertMeasures.js';
+import updateMeasureMetas from './routes/customer/metas/upsertMeasures.js';
 import deleteChild from './routes/customer/metas/deleteChild.js';
+import deleteMeasure from './routes/customer/metas/deleteMesure.js';
 import swaggerDocs from './utils/swagger.js';
 
 const app = express();
@@ -22,12 +23,12 @@ app.use((err, req, res, next) => {
     next();
 });
 
-// const corsOptions = {
-//   origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
-//   methods: process.env.CORS_METHODS || 'GET,POST',
-//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-// }
-// app.use(cors(corsOptions))
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
+  methods: process.env.CORS_METHODS || 'POST,DELETE',
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions));
 
 app.use("/api/token", getToken);
 
@@ -35,14 +36,15 @@ app.use("/api/customer/child/upsert", updateChildMetas);
 
 app.use("/api/customer/child/delete", deleteChild);
 
-app.use("/api/customer/measure/upsert", updatemeasureMetas);
+app.use("/api/customer/measure/upsert", updateMeasureMetas);
 
+app.use("/api/customer/measure/delete", deleteMeasure);
 
-app.get('/', (req, res) => {
-  console.log('req', req);
+// app.get('/', (req, res) => {
+//   console.log('req', req);
 
-  res.send('Hello World!');
-});
+//   res.send('Hello World!');
+// });
 
 if (process.env.ENVIRONMENT === 'development') {
   app.listen(3000, () => {
