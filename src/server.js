@@ -13,6 +13,8 @@ const app = express();
 
 app.use(express.json());
 
+console.log('process.env', process.env.ENVIRONMENT);
+
 
 // Handle JSON format errors
 app.use((err, req, res, next) => {
@@ -22,13 +24,14 @@ app.use((err, req, res, next) => {
     }
     next();
 });
+console.log('cc', process.env.CORS_ORIGIN);
 
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'https://nodetest.local.com',
-  methods: process.env.CORS_METHODS || 'POST,DELETE',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
-app.use(cors(corsOptions));
+// const corsOptions = {
+//   origin: process.env.CORS_ORIGIN || 'https://localhost:3000',
+//   methods: process.env.CORS_METHODS || 'POST,DELETE',
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
+// app.use(cors(corsOptions));
 
 app.use("/api/token", getToken);
 

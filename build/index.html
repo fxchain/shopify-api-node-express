@@ -9,6 +9,9 @@
     <script src="app.js" defer></script>
 </head>
 <body>
-    <div id="app">{{ message }}</div>
+    <div id="app">
+        {{ message }}
+        <span v-html="token"></span>
+    </div>
 </body>
 </html>
