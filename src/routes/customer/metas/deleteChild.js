@@ -24,7 +24,7 @@ const router = express.Router();
  *                   example: 123456789
  *       responses:
  *         '200':
- *           description: Delete child metaobject entry successful
+ *           description: Delete child metaobject entry successful. Shopify sometimes retruns erorrs with a 200 status. They will be stored in the userErrors array.
  *           content:
  *             application/json:
  *               schema:
@@ -60,8 +60,7 @@ const router = express.Router();
  *                   message: Internal Server Error
  */
 router.delete("/", auth, async (req, res) => {
-  // const customerId = req.customer
-  const customerId = 8643416850746;
+  const customerId = req.customer
   let variables;
 
   const { childId } = req.body;

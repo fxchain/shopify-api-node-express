@@ -10,7 +10,7 @@ createApp({
     methods: {
         
         getToken() {
-            this.token = fetch("https://shopify-node-app.netlify.app/api/token", {
+            this.token = fetch("localhost:3000/api/token", {
                 method: "POST",
                 body: JSON.stringify({ customerId: "8643416850746" }),
             });

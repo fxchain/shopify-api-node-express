@@ -79,8 +79,7 @@ const router = express.Router();
  *                   message: Internal Server Error
  */
 router.post("/", auth, async (req, res) => {
-  // const customerId = req.customer
-  const customerId = 8643416850746;
+  const customerId = req.customer
   let variables;
   const { handle, childId, pied_gauche_longueur, pied_gauche_largeur, pied_droit_longueur, pied_droit_largeur } = req.body;
 
@@ -227,9 +226,7 @@ const assignmeasureToChild = async (childId, measureId, res) => {
     measuresIds = `["${measureId}"]`;
   }
 
-  try {
-    console.log('dataChild', dataChild);
-    
+  try {    
     const measureMetafieldQuery = `
       mutation UpsertMetaobject($handle: MetaobjectHandleInput!, $metaobject: MetaobjectUpsertInput!) {
         metaobjectUpsert(handle: $handle, metaobject: $metaobject) {
