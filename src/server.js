@@ -29,13 +29,13 @@ app.use((err, req, res, next) => {
 // }
 // app.use(cors(corsOptions))
 
-app.use("/api/get_token", getToken);
+app.use("/api/token", getToken);
 
-app.use("/api/customer/upsert_child", updateChildMetas);
+app.use("/api/customer/child/upsert", updateChildMetas);
 
-app.use("/api/customer/delete_child", deleteChild);
+app.use("/api/customer/child/delete", deleteChild);
 
-app.use("/api/customer/upsert_measure", updatemeasureMetas);
+app.use("/api/customer/measure/upsert", updatemeasureMetas);
 
 
 app.get('/', (req, res) => {

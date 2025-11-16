@@ -7,11 +7,11 @@ const router = express.Router();
 
 /**
  * @openapi
- * /api/customer/upsert_child:
+ * /api/customer/child/upsert:
  *    post:
  *       tags:
  *         - Childs metaobject
- *       summary: Add or updates child Shopify metaobjet
+ *       summary: Add or update a Shopify child metaobjet entry
  *       requestBody:
  *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it. When parameter "handle" is not provided, the parameter "first_name" is required.
  *         required: true
@@ -53,7 +53,7 @@ const router = express.Router();
  *                     metaobjectUpsert:
  *                       metaobject:
  *                         id: 1234567890
- *                         handle: Victore-12345
+ *                         handle: victore-5
  *                         fields:
  *                           key: first_name
  *                           value: Victor

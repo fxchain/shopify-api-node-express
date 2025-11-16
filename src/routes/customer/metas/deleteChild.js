@@ -7,7 +7,7 @@ const router = express.Router();
 //TODO: readd auth
 /**
  * @openapi
- * /api/customer/delete_child:
+ * /api/customer/child/delete:
  *    delete:
  *       tags:
  *         - Childs metaobject

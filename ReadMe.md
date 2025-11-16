@@ -14,7 +14,7 @@ The minium app scopes are `write_metaobjects, read_metaobjects, read_customers`
 
 ## Current endpoints
 
-`/get_token` POST
+`/token` POST
 Public endpoint to retrive a JWT token valid for an hour. You must POST the customerID. Use this token to make calls to other prive endpoints
 
 `/update_customer_metafields` POST

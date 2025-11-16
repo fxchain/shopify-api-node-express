@@ -6,11 +6,12 @@ router.use(express.json());
 
 /**
  * @openapi
- * /api/get_token:
+ * /api/token:
  *    post:
  *       tags:
  *         - Authorization
  *       summary: Retrive a JWT token valid for 1 hour
+ *       description: If cookie is true, the application will create a JWT token cookie on the client for your next API calls. Recommended false or prarameter not provided for better security.
  *       security: []
  *       requestBody:
  *         required: true
@@ -20,7 +21,10 @@ router.use(express.json());
  *               properties:
  *                 customerId:
  *                   type: integer
+ *                   required: true
  *                   example: 123456789
+ *                 cookie:
+ *                   type: boolean
  *       responses:
  *         '200':
  *           description: The JWT token

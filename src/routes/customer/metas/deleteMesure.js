@@ -7,7 +7,7 @@ const router = express.Router();
 //TODO: readd auth
 /**
  * @openapi
- * /api/customer/delete_measure:
+ * /api/customer/measure/delete:
  *    delete:
  *       tags:
  *         - Measures metaobject
@@ -18,12 +18,12 @@ const router = express.Router();
  *           application/json: 
  *             schema:
  *               properties:
- *                 childId:
+ *                 measureId:
  *                   type: integer
  *                   example: 123456789
  *       responses:
  *         '200':
- *           description: Delete child metaobject entry successful
+ *           description: Delete measure metaobject entry successful
  *           content:
  *             application/json:
  *               schema:
@@ -40,7 +40,7 @@ const router = express.Router();
  *               schema:
  *                 type: object
  *                 example:
- *                   message: Child metaobject ID cannot be found.
+ *                   message: measure metaobject ID cannot be found.
  *         '401':
  *           description: Unauthorized - The JWT token was not provided, expired, or wrong.
  *           content:
@@ -63,64 +63,11 @@ router.delete("/", async (req, res) => {
   const customerId = 8643416850746;
   let variables;
 
-  const { childId } = req.body;
-
-  if (typeof childId === 'undefined') {
-    const childIdError = 'You must provide the child\'s "childId" parameter.'
-    res.status(400).json({ message: deleteHandleError });
-    return;
-  }
-
-  try {
-    const getChildMetaobjectQuery = `{
-      metaobject(id: "gid://shopify/Metaobject/${childId}") {
-        handle
-        field (key: "${metas.enfant.fields.measures}") {
-          value
-        }
-      }
-    }`;
-    const { data, errors } = await shopifyClient.request(getChildMetaobjectQuery);
-
-    if (typeof errors !== 'undefined') {
-        handleErrors(errors, res);
-        return;
-    }
-
-    if (data.metaobject === null) {
-      res.status(400).json({ message: 'Child metaobject ID cannot be found' });
-      return;
-    }
-    var dataChild = data;
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-
-  if (dataChild.metaobject.field.value !== null) {
-    const measuresString = dataChild.metaobject.field.value.replace('[', '').replace(']', '').replaceAll('"', '');
-    const measureIds = measuresString.split(',');
-
-    variables = {
-      "where": {
-        "ids": measureIds
-      }
-    }
-    const deleteMetaobjectsQuery = `
-      mutation DeleteMetaobjects($where: MetaobjectBulkDeleteWhereCondition!) {
-        metaobjectBulkDelete(where: $where) {
-          job {
-            id
-            done
-          }
-        }
-      }
-    `;
-    const { data, errors } = await shopifyClient.request(deleteMetaobjectsQuery, { variables: variables });
-  }
+  const { measureId } = req.body;
 
   try {
     variables = {
-      "id": `gid://shopify/Metaobject/${childId}`
+      "id": `gid://shopify/Metaobject/${measureId}`
     };
 
     const deleteMetaobjectQuery = `

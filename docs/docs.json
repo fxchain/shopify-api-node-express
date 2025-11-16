@@ -129,7 +129,7 @@
         }
       }
     },
-    "/get_token": {
+    "/token": {
       "post": {
         "tags": [
           "Authorization"

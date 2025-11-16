@@ -86,7 +86,7 @@ paths:
                 type: object
                 example:
                   message: Authentification failed
-  /get_token:
+  /token:
     post:
       tags:
         - Authorization

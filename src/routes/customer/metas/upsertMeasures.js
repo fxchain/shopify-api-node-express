@@ -8,13 +8,13 @@ const router = express.Router();
 //TODO: readd auth
 /**
  * @openapi
- * /api/customer/upsert_measure:
+ * /api/customer/measure/upsert:
  *    post:
  *       tags:
  *         - Measures metaobject
- *       summary: Add or updates measure Shopify metafields and metaobjets
+ *       summary: Add or update a Shopify measure metaobjet entry
  *       requestBody:
- *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it.
+ *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it. Parameter "childId" is required.
  *         required: true
  *         content:
  *           application/json: 
@@ -23,11 +23,12 @@ const router = express.Router();
  *                 handle:
  *                   type: string
  *                 childId:
- *                   type: integer
+ *                   type: integert
+ *                   required: true
  *                 pied_gauche_longueur:
  *                   type: integer
  *                 pied_gauche_largeur:
- *                   type: integer
+ *                   type: int  eger
  *                 pied_droit_longueur:
  *                   type: integer
  *                 pied_droit_largeur:
@@ -38,7 +39,7 @@ const router = express.Router();
  *                 pied_gauche_longueur: 10
  *                 pied_gauche_largeur: 4
  *                 pied_droit_longueur: 10.5
- *                 pied_droit_largeur: 4.2 *                   
+ *                 pied_droit_largeur: 4.2
  *       responses:
  *         '200':
  *           description: Update to measure's metas successful
@@ -104,7 +105,6 @@ router.post("/", async (req, res) => {
   const offset = date.getTimezoneOffset();
   date = new Date(date.getTime() - (offset * 60 * 1000));
   const now = date.toISOString().split('T')[0];
-
   const measureHandle = (typeof handle === 'undefined') ? '' : handle;
 
   const fieldsmeasure = [
