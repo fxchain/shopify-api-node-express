@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 function auth(req, res, next) {  
-  const jwtToken = req.header('Authorization');
+  const jwtToken = req.header('Authorization').replace('Bearer ', '');
   
   if (!jwtToken) {
     return res.status(401).json({ message: "Not authorized" });
@@ -11,6 +11,7 @@ function auth(req, res, next) {
     if (err) {
       return res.status(401).json({ message: "Not authorized" });
     }
+    
     req.customerId = decoded.customerId;
     next();
   });

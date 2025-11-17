@@ -190,7 +190,7 @@ router.post("/", auth, async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message + "01" });
+    res.status(500).json({ message: error.message  });
     return;
   }
 });

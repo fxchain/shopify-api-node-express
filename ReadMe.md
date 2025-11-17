@@ -4,21 +4,13 @@ This backend Node application is used as a middleware to enable frontend apps to
 
 It uses JWT token and CORS for security.
 
-You fist query for a JWT token using the Shopify customer's ID, and you get an JWR token, valid for 1h, to use in your frontend app. Then you can make queries to interact with the Shopify admin API.
+You fist query for a JWT token using the Shopify customer's ID valid for 1h, to use in your frontend app. Then you can make queries to interact with the Shopify admin API.
 
 ## App scopes
 
 Currently, this app only enables writing to a customer's metafields/metaobject
 
 The minium app scopes are `write_metaobjects, read_metaobjects, read_customers`
-
-## Current endpoints
-
-`/token` POST
-Public endpoint to retrive a JWT token valid for an hour. You must POST the customerID. Use this token to make calls to other prive endpoints
-
-`/update_customer_metafields` POST
-Public endpoint to update customer's metafields or metaobjects.
 
 ## Install
 
@@ -42,8 +34,7 @@ Edit the .env file witht the required info. You will need to create a private ap
 
 Use something like Postman to make calls to the local app.
 
-<!-- ### Server install
+### API documentation
+When running the dev server, API documentation is available via Swagger
 ```
-npm install
-npm run start
-``` -->
+http://localhost:3000/docs

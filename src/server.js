@@ -1,5 +1,4 @@
 import express from 'express';
-import auth from './middleware/auth.js';
 import cors from 'cors';
 import getToken from './routes/getToken/index.js';
 // import updateCustomerMetas from './routes/customer/metas/index.js';

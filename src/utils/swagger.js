@@ -23,16 +23,31 @@ const options = {
         bearerAuth: [],
       },
     ],
-    tags: [{name: "Authorization"}, {name: "Childs metaobject"}, {name: "Measures metaobject"}]
+    tags: [{name: "Authorization"}, {name: "Childs metaobject"}, {name: "Measures metaobject"}],
   },
   apis: ["./src/routes/**/*.js"],
+};
+
+ const swaggerOptions = {
+    swaggerOptions: {
+        operationsSorter: (a, b) => {
+            var methodsOrder = ["get", "post", "put", "patch", "delete", "options", "trace"];
+            var result = methodsOrder.indexOf(a.get("method")) - methodsOrder.indexOf(b.get("method"));
+
+            if (result === 0) {
+                result = a.get("path").localeCompare(b.get("path"));
+            }
+
+            return result;
+        }
+    }
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 const swaggerDocs = ((app, port) => {
   // Swagger page
-  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
 
   // Docs in JSON format
   app.get("/docs.json", (req, res) => {
@@ -41,7 +56,6 @@ const swaggerDocs = ((app, port) => {
   });
 
   console.log(`Docs available at http://localhost:${port}/docs or in JSON format at http://localhost:${port}/docs.json`);
-  // console.log(`Docs in a JSON format available at http://localhost:${port}/docs.json`);
 });
 
 export default swaggerDocs;

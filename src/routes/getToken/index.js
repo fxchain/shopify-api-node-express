@@ -11,7 +11,7 @@ router.use(express.json());
  *       tags:
  *         - Authorization
  *       summary: Retrive a JWT token valid for 1 hour
- *       description: If cookie is true, the application will create a JWT token cookie on the client for your next API calls. Recommended false or prarameter not provided for better security.
+ *       description: Retrive a JWT token.
  *       security: []
  *       requestBody:
  *         required: true
@@ -23,8 +23,6 @@ router.use(express.json());
  *                   type: integer
  *                   required: true
  *                   example: 123456789
- *                 cookie:
- *                   type: boolean
  *       responses:
  *         '200':
  *           description: The JWT token
@@ -52,11 +50,10 @@ router.use(express.json());
  *                   message: Internal Server Error
  */
 router.post("/", async (req, res) => {
-	let { customerId, cookie } = req.body;
-
-	if (!cookie) {
-		cookie = false;
+	if (typeof req.body === 'undefined') {
+		res.status(401).json({ message: "Authentification failed." });
 	}
+	let { customerId } = req.body;
 
 	if (!isNaN(customerId)) {
 		//Check if customer id exists on store
@@ -69,7 +66,7 @@ router.post("/", async (req, res) => {
 				}
 			`;
 
-			const { data, errors, extensions } = await shopifyClient.request(operation, {
+			const { data } = await shopifyClient.request(operation, {
 				variables: {
 					id: `gid://shopify/Customer/${customerId}`,
 				},
@@ -83,13 +80,16 @@ router.post("/", async (req, res) => {
 				expiresIn: '1h',
 			});
 
-			if (cookie && cookie === true) {
-				res.cookie('middleware_token', jwtToken, {
-					httpOnly: true,
-					secure: process.env.ENVIRONMENT === 'production', // Only send over HTTPS
-					sameSite: 'Strict' // Protect against CSRF
-				});
-			}
+			// if (cookie && cookie === true) {
+			// 	console.log('set cookie', process.env.ENVIRONMENT === 'production');
+			// 	res.cookie('rememberme', '1', { maxAge: 900000, httpOnly: true });
+			// 	res.cookie('myCookie', 'cookie_value', { maxAge: 3600000 });
+			// 	res.cookie('sqdf', jwtToken, {
+			// 		// httpOnly: true,
+			// 		secure: process.env.ENVIRONMENT === 'production', // Only send over HTTPS
+			// 		sameSite: 'Strict' // Protect against CSRF
+			// 	});
+			// }
 			res.json({token: jwtToken});
 		} catch (error) {
 			res.status(401).json({ message: 'Authentification failed.' });

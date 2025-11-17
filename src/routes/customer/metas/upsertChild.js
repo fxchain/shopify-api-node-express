@@ -5,6 +5,15 @@ import handleErrors from '../../../utils/handleErrors.js';
 import metas from '../../../schema/customer_metas.json' with { type: "json" };
 const router = express.Router();
 
+
+//  *       parameters:
+//  *         - in: header
+//  *           name: Authorization
+//  *           schema:
+//  *             type: string
+//  *           required: true
+//  *           description: The JWT token
+
 /**
  * @openapi
  * /api/customer/child/upsert:
@@ -12,12 +21,6 @@ const router = express.Router();
  *       tags:
  *         - Childs metaobject
  *       summary: Add or update a Shopify child metaobjet entry
- *       parameters:
- *         name: Autorization
- *         schema:
- *           type: integer
- *         required: true
- *         description: The JWT token
  *       requestBody:
  *         description: When parameter "handle" is not provided, it will create a new metaobject entry, otherwise update it. When parameter "handle" is not provided, the parameter "first_name" is required.
  *         required: true
@@ -90,7 +93,7 @@ const router = express.Router();
  *                   message: Internal Server Error
  */
 router.post("/", auth, async (req, res) => {
-  const customerId = req.customer
+  const customerId = req.customerId
   let variables;
 
   const { handle, first_name, birthday, persona, chaussures_associees } = req.body;
