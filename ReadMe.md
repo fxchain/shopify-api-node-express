@@ -30,7 +30,13 @@ cp .env.exemple .env
 Edit the .env file witht the required info. You will need to create a private app in Shopify, assign the correct scopes and get your app's Admin API access token.
 
 #### Run the app locally
-`npm run dev`
+```
+npm run dev
+```
+App will start at 
+```
+http://localhost:3000
+```
 
 Use something like Postman to make calls to the local app.
 
